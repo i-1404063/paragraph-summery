@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  go-app:
+    restart: always
+    container_name: "summery_backend"
+    build:
+      context: ./summery-backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"  
+    environment:
+      CON_STRING : postgres://${DB_USER}:${DB_PASSWORD}@db/summery_db
+    depends_on:
+      - db
+
+  react-app:
+    restart: always
+    container_name: "summery_frontend"
+    build:
+      context: ./summery-frontend
+      dockerfile: Dockerfile  
+    ports:
+      - "3000:80"
+    depends_on:
+      - go-app
+
+  db:
+    image: postgres:latest
+    restart: always
+    container_name: "summery_db"
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  db-data:
